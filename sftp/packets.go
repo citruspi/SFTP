@@ -131,8 +131,10 @@ type SSHFxVersionPacket struct {
 	Extensions []ExtensionPair
 }
 
-func (p SSHFxVersionPacket) MarshalBinary() ([]byte, error) {
-	// 1 byte for the packet type and 4 for the version value
+func (p *SSHFxVersionPacket) Type() int         { return SSH_FXP_VERSION }
+func (p *SSHFxVersionPacket) RequestId() uint32 { return 0 }
+
+func (p *SSHFxVersionPacket) Length() uint32 {
 	length := 1 + 4
 
 	for _, extension := range p.Extensions {
@@ -140,15 +142,54 @@ func (p SSHFxVersionPacket) MarshalBinary() ([]byte, error) {
 		length += 4 + len(extension.Name) + 4 + len(extension.Data)
 	}
 
-	binary := make([]byte, 0, length)
+	return uint32(length)
+}
 
-	binary = append(binary, SSH_FXP_INIT)
-	binary = MarshalUint32(binary, p.Version)
+func (p *SSHFxVersionPacket) Payload() []byte {
+	var payload []byte
+
+	payload = MarshalUint32(payload, p.Version)
 
 	for _, extension := range p.Extensions {
-		binary = MarshalString(binary, extension.Name)
-		binary = MarshalString(binary, extension.Data)
+		payload = MarshalString(payload, extension.Name)
+		payload = MarshalString(payload, extension.Data)
 	}
 
-	return binary, nil
+	return payload
+}
+
+func (p *SSHFxVersionPacket) Marshal() ([]byte, error) {
+	encoded, err := MarshalPacket(p)
+
+	return encoded, err
+}
+
+func (p *SSHFxVersionPacket) Unmarshal(b []byte) error {
+	_, _, payload, err := UnmarshalPacket(b)
+
+	if err != nil {
+		return err
+	}
+
+	version, payload, err := UnmarshalUint32Safe(payload)
+
+	if err != nil {
+		return err
+	}
+
+	p.Version = version
+
+	if len(payload) > 0 {
+		var extension ExtensionPair
+
+		extension, payload, err = UnmarshalExtensionPair(payload)
+
+		if err != nil {
+			return err
+		}
+
+		p.Extensions = append(p.Extensions, extension)
+	}
+
+	return nil
 }
