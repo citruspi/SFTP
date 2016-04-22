@@ -58,6 +58,34 @@ func MarshalPacket(p Packet) []byte {
 	return encoded
 }
 
+func UnmarshalPacket(b []byte) (int, uint32, []byte, error) {
+	var type_ int
+	var requestId uint32
+	var payload []byte
+	var err error
+
+	_, b, err = UnmarshalUint32Safe(b)
+
+	if err != nil {
+		return type_, requestId, payload, err
+	}
+
+	type_ = int(b[0])
+	b = b[1:]
+
+	if (type_ != SSH_FXP_INIT) && (type_ != SSH_FXP_VERSION) {
+		requestId, b, err = UnmarshalUint32Safe(b)
+
+		if err != nil {
+			return type_, requestId, payload, err
+		}
+	}
+
+	payload = b
+
+	return type_, requestId, payload, err
+}
+
 type SSHFxInitPacket struct {
 	Version uint32
 }
