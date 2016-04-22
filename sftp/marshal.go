@@ -28,3 +28,27 @@ func UnmarshalUint32Safe(b []byte) (uint32, []byte, error) {
 
 	return u, b, nil
 }
+
+func MarshalUint64(b []byte, u uint64) []byte {
+	e := make([]byte, 8)
+
+	binary.BigEndian.PutUint64(e, u)
+
+	return append(b, e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7])
+}
+
+func UnmarshalUint64(b []byte) (uint64, []byte) {
+	u := binary.BigEndian.Uint64(b)
+
+	return u, b[8:]
+}
+
+func UnmarshalUint64Safe(b []byte) (uint64, []byte, error) {
+	if len(b) < 8 {
+		return 0, nil, errors.New("Not enough bytes to unmarshal uint64")
+	}
+
+	u, b := UnmarshalUint64(b)
+
+	return u, b, nil
+}
