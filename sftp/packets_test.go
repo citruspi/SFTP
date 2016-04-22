@@ -6,6 +6,24 @@ import (
 	"testing"
 )
 
+func TestDecodePacket(t *testing.T) {
+	encoded := []byte{0, 0, 0, 5, 1, 0, 0, 0, 3}
+
+	decoded, err := DecodePacket(encoded)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	packet := &SSHFxInitPacket{
+		Version: 3,
+	}
+
+	if !reflect.DeepEqual(decoded, packet) {
+		t.Errorf("Expected %+v, received %+v", packet, decoded)
+	}
+}
+
 func TestSSHFxInitPacketMarshal(t *testing.T) {
 	packet := &SSHFxInitPacket{
 		Version: uint32(3),
