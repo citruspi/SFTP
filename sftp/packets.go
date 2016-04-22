@@ -67,14 +67,16 @@ type SSHFxInitPacket struct {
 	Version uint32
 }
 
-func (p SSHFxInitPacket) MarshalBinary() ([]byte, error) {
+func (p SSHFxInitPacket) Type() int         { return SSH_FXP_INIT }
+func (p SSHFxInitPacket) RequestId() uint32 { return 0 }
+func (p SSHFxInitPacket) Length() uint32    { return 1 + 4 }
+
+func (p SSHFxInitPacket) Payload() []byte {
 	var encoded []byte
 
 	encoded = MarshalUint32(encoded, p.Version)
 
-	encoded = MarshalPacket(SSH_FXP_INIT, 0, encoded)
-
-	return encoded, nil
+	return encoded
 }
 
 func (p *SSHFxInitPacket) UnmarshalBinary(b []byte) error {
