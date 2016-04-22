@@ -86,3 +86,30 @@ func (p *SSHFxInitPacket) UnmarshalBinary(b []byte) error {
 
 	return nil
 }
+
+type SSHFxVersionPacket struct {
+	Version    uint32
+	Extensions []ExtensionPair
+}
+
+func (p SSHFxVersionPacket) MarshalBinary() ([]byte, error) {
+	// 1 byte for the packet type and 4 for the version value
+	length := 1 + 4
+
+	for _, extension := range p.Extensions {
+		// 4 bytes per string marshalled + length of each string
+		length += 4 + len(extension.Name) + 4 + len(extension.Data)
+	}
+
+	binary := make([]byte, 0, length)
+
+	binary = append(binary, SSH_FXP_INIT)
+	binary = MarshalUint32(binary, p.Version)
+
+	for _, extension := range p.Extensions {
+		binary = MarshalString(binary, extension.Name)
+		binary = MarshalString(binary, extension.Data)
+	}
+
+	return binary, nil
+}
