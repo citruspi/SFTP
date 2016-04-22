@@ -33,36 +33,20 @@ const (
 )
 
 type SSHFxInitPacket struct {
-	Version    uint32
-	Extensions []ExtensionPair
+	Version uint32
 }
 
 func (p SSHFxInitPacket) MarshalBinary() ([]byte, error) {
-	// 1 byte for the packet type and 4 for the version value
-	length := 1 + 4
+	var encoded []byte
 
-	for _, extension := range p.Extensions {
-		// 4 bytes per string marshalled + length of each string
-		length += 4 + len(extension.Name) + 4 + len(extension.Data)
-	}
+	encoded = append(encoded, SSH_FXP_INIT)
+	encoded = MarshalUint32(encoded, p.Version)
 
-	binary := make([]byte, 0, length)
-
-	binary = append(binary, SSH_FXP_INIT)
-	binary = MarshalUint32(binary, p.Version)
-
-	for _, extension := range p.Extensions {
-		binary = MarshalString(binary, extension.Name)
-		binary = MarshalString(binary, extension.Data)
-	}
-
-	return binary, nil
+	return encoded, nil
 }
 
 func (p *SSHFxInitPacket) UnmarshalBinary(b []byte) error {
 	var version uint32
-	var extensions []ExtensionPair
-	var extension ExtensionPair
 	var err error
 
 	version, b, err = UnmarshalUint32Safe(b[1:])
@@ -71,18 +55,7 @@ func (p *SSHFxInitPacket) UnmarshalBinary(b []byte) error {
 		return err
 	}
 
-	for len(b) > 0 {
-		extension, b, err = UnmarshalExtensionPair(b)
-
-		if err != nil {
-			return err
-		}
-
-		extensions = append(p.Extensions, extension)
-	}
-
 	p.Version = version
-	p.Extensions = extensions
 
 	return nil
 }

@@ -8,13 +8,11 @@ import (
 
 func TestSSHFxInitPacketMarshalBinary(t *testing.T) {
 	var version uint32
-	var extensions []ExtensionPair
 
 	version = uint32(3)
 
 	packet := &SSHFxInitPacket{
-		Version:    version,
-		Extensions: extensions,
+		Version: version,
 	}
 
 	marshalled, err := packet.MarshalBinary()
