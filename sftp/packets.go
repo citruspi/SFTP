@@ -102,11 +102,20 @@ func (p *SSHFxInitPacket) Payload() []byte {
 	return encoded
 }
 
-func (p *SSHFxInitPacket) UnmarshalBinary(b []byte) error {
-	var version uint32
-	var err error
+func (p *SSHFxInitPacket) Marshal() ([]byte, error) {
+	encoded, err := MarshalPacket(p)
 
-	version, b, err = UnmarshalUint32Safe(b[1:])
+	return encoded, err
+}
+
+func (p *SSHFxInitPacket) Unmarshal(b []byte) error {
+	_, _, payload, err := UnmarshalPacket(b)
+
+	if err != nil {
+		return err
+	}
+
+	version, payload, err := UnmarshalUint32Safe(payload)
 
 	if err != nil {
 		return err
