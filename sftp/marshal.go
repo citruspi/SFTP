@@ -52,3 +52,27 @@ func UnmarshalUint64Safe(b []byte) (uint64, []byte, error) {
 
 	return u, b, nil
 }
+
+func MarshalString(b []byte, s string) []byte {
+	return append(MarshalUint32(b, uint32(len(s))), s...)
+}
+
+func UnmarshalString(b []byte) (string, []byte) {
+	s, b := UnmarshalUint32(b)
+
+	return string(b[:s]), b[s:]
+}
+
+func UnmarshalStringSafe(b []byte) (string, []byte, error) {
+	s, b, err := UnmarshalUint32Safe(b)
+
+	if err != nil {
+		return "", nil, err
+	}
+
+	if int64(s) > int64(len(b)) {
+		return "", nil, errors.New("Not enough bytes to unmarshal string")
+	}
+
+	return string(b[:s]), b[s:], nil
+}
