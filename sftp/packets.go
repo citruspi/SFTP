@@ -32,6 +32,13 @@ const (
 	SSH_FXP_EXTENDED_REPLY = 201
 )
 
+type Packet interface {
+	Type() int
+	RequestId() uint32
+	Length() uint32
+	Payload() []byte
+}
+
 // General Packet Format
 // https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-4
 func MarshalPacket(type_ int, requestID uint32, payload []byte) []byte {
