@@ -90,11 +90,11 @@ type SSHFxInitPacket struct {
 	Version uint32
 }
 
-func (p SSHFxInitPacket) Type() int         { return SSH_FXP_INIT }
-func (p SSHFxInitPacket) RequestId() uint32 { return 0 }
-func (p SSHFxInitPacket) Length() uint32    { return 1 + 4 }
+func (p *SSHFxInitPacket) Type() int         { return SSH_FXP_INIT }
+func (p *SSHFxInitPacket) RequestId() uint32 { return 0 }
+func (p *SSHFxInitPacket) Length() uint32    { return 1 + 4 }
 
-func (p SSHFxInitPacket) Payload() []byte {
+func (p *SSHFxInitPacket) Payload() []byte {
 	var encoded []byte
 
 	encoded = MarshalUint32(encoded, p.Version)
