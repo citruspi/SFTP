@@ -63,8 +63,9 @@ type SSHFxInitPacket struct {
 func (p SSHFxInitPacket) MarshalBinary() ([]byte, error) {
 	var encoded []byte
 
-	encoded = append(encoded, SSH_FXP_INIT)
 	encoded = MarshalUint32(encoded, p.Version)
+
+	encoded = MarshalPacket(SSH_FXP_INIT, 0, encoded)
 
 	return encoded, nil
 }

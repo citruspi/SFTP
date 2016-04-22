@@ -21,7 +21,7 @@ func TestSSHFxInitPacketMarshalBinary(t *testing.T) {
 		t.Error(err)
 	}
 
-	expected := []byte{1, 0, 0, 0, 3}
+	expected := []byte{0, 0, 0, 5, 1, 0, 0, 0, 3}
 
 	if !bytes.Equal(marshalled, expected) {
 		t.Errorf("Expected %v, received %v", expected, marshalled)
