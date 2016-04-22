@@ -41,24 +41,17 @@ type Packet interface {
 
 // General Packet Format
 // https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-4
-func MarshalPacket(type_ int, requestID uint32, payload []byte) []byte {
+func MarshalPacket(p Packet) []byte {
 	var encoded []byte
 
-	encoded = []byte{0, 0, 0, 0}
+	encoded = MarshalUint32(encoded, p.Length())
+	encoded = append(encoded, byte(p.Type()))
 
-	encoded = append(encoded, byte(type_))
-
-	if (type_ != SSH_FXP_INIT) && (type_ != SSH_FXP_VERSION) {
-		encoded = MarshalUint32(encoded, requestID)
+	if (p.Type() != SSH_FXP_INIT) && (p.Type() != SSH_FXP_VERSION) {
+		encoded = MarshalUint32(encoded, p.RequestId())
 	}
 
-	encoded = append(encoded, payload...)
-
-	length := []byte{}
-
-	length = MarshalUint32(length, uint32(len(encoded)-4))
-
-	encoded[0], encoded[1], encoded[2], encoded[3] = length[0], length[1], length[2], length[3]
+	encoded = append(encoded, p.Payload()...)
 
 	return encoded
 }
