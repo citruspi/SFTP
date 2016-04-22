@@ -37,6 +37,8 @@ type Packet interface {
 	RequestId() uint32
 	Length() uint32
 	Payload() []byte
+	Marshal() ([]byte, error)
+	Unmarshal([]byte) error
 }
 
 // General Packet Format
