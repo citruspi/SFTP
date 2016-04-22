@@ -6,16 +6,12 @@ import (
 	"testing"
 )
 
-func TestSSHFxInitPacketMarshalBinary(t *testing.T) {
-	var version uint32
-
-	version = uint32(3)
-
+func TestSSHFxInitPacketMarshal(t *testing.T) {
 	packet := &SSHFxInitPacket{
-		Version: version,
+		Version: uint32(3),
 	}
 
-	marshalled, err := packet.MarshalBinary()
+	marshalled, err := packet.Marshal()
 
 	if err != nil {
 		t.Error(err)
@@ -28,9 +24,10 @@ func TestSSHFxInitPacketMarshalBinary(t *testing.T) {
 	}
 }
 
-func TestSSHFxInitPacketUnmarshalBinary(t *testing.T) {
+func TestSSHFxInitPacketUnmarshal(t *testing.T) {
 	packet := &SSHFxInitPacket{}
-	err := packet.UnmarshalBinary([]byte{1, 0, 0, 0, 3})
+
+	err := packet.Unmarshal([]byte{0, 0, 0, 5, 1, 0, 0, 0, 3})
 
 	if err != nil {
 		t.Error(err)
