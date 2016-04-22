@@ -43,7 +43,7 @@ type Packet interface {
 
 // General Packet Format
 // https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-4
-func MarshalPacket(p Packet) []byte {
+func MarshalPacket(p Packet) ([]byte, error) {
 	var encoded []byte
 
 	encoded = MarshalUint32(encoded, p.Length())
@@ -55,7 +55,7 @@ func MarshalPacket(p Packet) []byte {
 
 	encoded = append(encoded, p.Payload()...)
 
-	return encoded
+	return encoded, nil
 }
 
 func UnmarshalPacket(b []byte) (int, uint32, []byte, error) {
