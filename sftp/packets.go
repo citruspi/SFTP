@@ -31,3 +31,8 @@ const (
 	SSH_FXP_EXTENDED       = 200
 	SSH_FXP_EXTENDED_REPLY = 201
 )
+
+type SSHFxInitPacket struct {
+	Version    uint32
+	Extensions []ExtensionPair
+}
