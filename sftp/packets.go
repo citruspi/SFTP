@@ -1,5 +1,9 @@
 package sftp
 
+import (
+	"fmt"
+)
+
 // SFTP Packet Type Values
 // https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-4.3
 const (
@@ -84,6 +88,25 @@ func UnmarshalPacket(b []byte) (int, uint32, []byte, error) {
 	payload = b
 
 	return type_, requestId, payload, err
+}
+
+func DecodePacket(b []byte) (Packet, error) {
+	var packet Packet
+
+	type_ := int(b[4])
+
+	switch type_ {
+	case SSH_FXP_INIT:
+		packet = &SSHFxInitPacket{}
+	case SSH_FXP_VERSION:
+		packet = &SSHFxVersionPacket{}
+	default:
+		return packet, fmt.Errorf("Unrecognized packet type %v", type_)
+	}
+
+	err := packet.Unmarshal(b)
+
+	return packet, err
 }
 
 type SSHFxInitPacket struct {
