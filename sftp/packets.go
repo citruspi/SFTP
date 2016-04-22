@@ -58,3 +58,31 @@ func (p SSHFxInitPacket) MarshalBinary() ([]byte, error) {
 
 	return binary, nil
 }
+
+func (p *SSHFxInitPacket) UnmarshalBinary(b []byte) error {
+	var version uint32
+	var extensions []ExtensionPair
+	var extension ExtensionPair
+	var err error
+
+	version, b, err = UnmarshalUint32Safe(b[1:])
+
+	if err != nil {
+		return err
+	}
+
+	for len(b) > 0 {
+		extension, b, err = UnmarshalExtensionPair(b)
+
+		if err != nil {
+			return err
+		}
+
+		extensions = append(p.Extensions, extension)
+	}
+
+	p.Version = version
+	p.Extensions = extensions
+
+	return nil
+}
