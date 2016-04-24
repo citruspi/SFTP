@@ -10,6 +10,7 @@ type Server struct {
 	Out           io.WriteCloser
 	OutMutex      *sync.Mutex
 	PacketChannel chan Packet
+	WorkerCount   int
 }
 
 func (s *Server) SendPacket(p Packet) (int, error) {
