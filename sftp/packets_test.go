@@ -60,6 +60,26 @@ func TestSSHFxInitPacketUnmarshal(t *testing.T) {
 	}
 }
 
+func TestSSHFxInitPacketResponse(t *testing.T) {
+	packet := &SSHFxInitPacket{
+		Version: uint32(3),
+	}
+
+	expected := &SSHFxVersionPacket{
+		Version: uint32(3),
+	}
+
+	response, err := packet.Response()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(expected, response) {
+		t.Errorf("Expected %+v, received %+v", expected, response)
+	}
+}
+
 func TestSSHFxVersionPacketMarshal(t *testing.T) {
 	packet := &SSHFxVersionPacket{
 		Version:    uint32(3),
