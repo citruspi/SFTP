@@ -225,3 +225,7 @@ func (p *SSHFxVersionPacket) Unmarshal(b []byte) error {
 
 	return nil
 }
+
+func (p *SSHFxVersionPacket) Response() (Packet, error) {
+	return nil, nil
+}
