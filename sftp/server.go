@@ -69,3 +69,25 @@ func (s *Server) ReceivePackets() error {
 		s.PacketChannel <- packet
 	}
 }
+
+func (s *Server) Worker(results chan error) {
+	for packet := range s.PacketChannel {
+		response, err := packet.Response()
+
+		if err != nil {
+			results <- err
+			return
+		}
+
+		if response != nil {
+			_, err = s.SendPacket(response)
+
+			if err != nil {
+				results <- err
+				return
+			}
+		}
+	}
+
+	results <- nil
+}
