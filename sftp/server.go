@@ -122,6 +122,7 @@ func (s *Server) Serve() error {
 	defer s.Out.Close()
 
 	log.Debug("Receiving packets")
+
 	go s.ReceivePackets()
 
 	results := make(chan error)
