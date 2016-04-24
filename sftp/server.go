@@ -96,14 +96,14 @@ func (s *Server) Worker(results chan error) {
 			return
 		}
 
-		log.WithFields(log.Fields{
-			"packet_type":   packet.Type(),
-			"packet_id":     packet.RequestId(),
-			"response_type": response.Type(),
-			"response_id":   response.RequestId(),
-		}).Debug("Responding to packet")
-
 		if response != nil {
+			log.WithFields(log.Fields{
+				"packet_type":   packet.Type(),
+				"packet_id":     packet.RequestId(),
+				"response_type": response.Type(),
+				"response_id":   response.RequestId(),
+			}).Debug("Responding to packet")
+
 			_, err = s.SendPacket(response)
 
 			if err != nil {
