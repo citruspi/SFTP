@@ -113,3 +113,15 @@ func (s *Server) Serve() error {
 
 	return nil
 }
+
+func NewServer(in io.Reader, out io.WriteCloser, workers int) (*Server, error) {
+	server := &Server{
+		In:            in,
+		Out:           out,
+		OutMutex:      &sync.Mutex{},
+		PacketChannel: make(chan Packet),
+		WorkerCount:   workers,
+	}
+
+	return server, nil
+}
