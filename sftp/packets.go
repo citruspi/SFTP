@@ -150,6 +150,14 @@ func (p *SSHFxInitPacket) Unmarshal(b []byte) error {
 	return nil
 }
 
+func (p *SSHFxInitPacket) Response() (Packet, error) {
+	packet := &SSHFxVersionPacket{
+		Version: uint32(3),
+	}
+
+	return packet, nil
+}
+
 type SSHFxVersionPacket struct {
 	Version    uint32
 	Extensions []ExtensionPair
