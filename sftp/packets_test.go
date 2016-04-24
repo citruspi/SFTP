@@ -98,3 +98,20 @@ func TestSSHFxVersionPacketMarshal(t *testing.T) {
 		t.Errorf("Expected %v, received %v", expected, marshalled)
 	}
 }
+
+func TestSSHFxVersionPacketResponse(t *testing.T) {
+	packet := &SSHFxVersionPacket{
+		Version:    uint32(3),
+		Extensions: []ExtensionPair{},
+	}
+
+	response, err := packet.Response()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if response != nil {
+		t.Errorf("Expected nil, received %+v", response)
+	}
+}
