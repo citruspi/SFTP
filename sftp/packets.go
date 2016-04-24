@@ -104,6 +104,8 @@ func DecodePacket(b []byte) (Packet, error) {
 		packet = &SSHFxInitPacket{}
 	case SSH_FXP_VERSION:
 		packet = &SSHFxVersionPacket{}
+	case SSH_FXP_REALPATH:
+		packet = &SSHFxRealPathPacket{}
 	default:
 		err = fmt.Errorf("Unrecognized packet type %v", type_)
 	}
@@ -246,5 +248,58 @@ func (p *SSHFxVersionPacket) Unmarshal(b []byte) error {
 }
 
 func (p *SSHFxVersionPacket) Response() (Packet, error) {
+	return nil, nil
+}
+
+type SSHFxRealPathPacket struct {
+	RequestID    uint32
+	OriginalPath string
+}
+
+func (p *SSHFxRealPathPacket) Type() int         { return SSH_FXP_REALPATH }
+func (p *SSHFxRealPathPacket) RequestId() uint32 { return p.RequestID }
+
+func (p *SSHFxRealPathPacket) Length() uint32 {
+	// Type + Request Id + String(4 + len(OriginalPath))
+	length := 1 + 4 + 4 + len(p.OriginalPath)
+
+	return uint32(length)
+}
+
+func (p *SSHFxRealPathPacket) Payload() []byte {
+	var payload []byte
+
+	payload = MarshalString(payload, p.OriginalPath)
+
+	return payload
+}
+
+func (p *SSHFxRealPathPacket) Marshal() ([]byte, error) {
+	encoded, err := MarshalPacket(p)
+
+	return encoded, err
+}
+
+func (p *SSHFxRealPathPacket) Unmarshal(b []byte) error {
+	_, requestId, payload, err := UnmarshalPacket(b)
+
+	if err != nil {
+		return err
+	}
+
+	originalPath, _, err := UnmarshalStringSafe(payload)
+
+	if err != nil {
+		return err
+	}
+
+	p.RequestID = requestId
+	p.OriginalPath = originalPath
+
+	return nil
+}
+
+func (p *SSHFxRealPathPacket) Response() (Packet, error) {
+	// TODO: Implement SSH_FXP_NAME packet
 	return nil, nil
 }
