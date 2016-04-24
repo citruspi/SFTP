@@ -43,6 +43,7 @@ type Packet interface {
 	Payload() []byte
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
+	Response() (Packet, error)
 }
 
 // General Packet Format
