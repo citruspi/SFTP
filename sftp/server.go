@@ -91,3 +91,25 @@ func (s *Server) Worker(results chan error) {
 
 	results <- nil
 }
+
+func (s *Server) Serve() error {
+	defer s.Out.Close()
+
+	go s.ReceivePackets()
+
+	results := make(chan error)
+
+	for i := 0; i < s.WorkerCount; i++ {
+		go s.Worker(results)
+	}
+
+	for i := 0; i < s.WorkerCount; i++ {
+		err := <-results
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
