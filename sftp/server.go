@@ -3,6 +3,8 @@ package sftp
 import (
 	"io"
 	"sync"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type Server struct {
@@ -14,6 +16,11 @@ type Server struct {
 }
 
 func (s *Server) SendPacket(p Packet) (int, error) {
+	log.WithFields(log.Fields{
+		"type": p.Type(),
+		"id":   p.RequestId(),
+	}).Debug("Marshalling packet")
+
 	encoded, err := p.Marshal()
 
 	if err != nil {
@@ -22,6 +29,11 @@ func (s *Server) SendPacket(p Packet) (int, error) {
 
 	s.OutMutex.Lock()
 	defer s.OutMutex.Unlock()
+
+	log.WithFields(log.Fields{
+		"type": p.Type(),
+		"id":   p.RequestId(),
+	}).Debug("Sending packet")
 
 	n, err := s.Out.Write(encoded)
 
@@ -66,6 +78,11 @@ func (s *Server) ReceivePackets() error {
 			return err
 		}
 
+		log.WithFields(log.Fields{
+			"type": packet.Type(),
+			"id":   packet.RequestId(),
+		}).Debug("Received packet")
+
 		s.PacketChannel <- packet
 	}
 }
@@ -78,6 +95,13 @@ func (s *Server) Worker(results chan error) {
 			results <- err
 			return
 		}
+
+		log.WithFields(log.Fields{
+			"packet_type":   packet.Type(),
+			"packet_id":     packet.RequestId(),
+			"response_type": response.Type(),
+			"response_id":   response.RequestId(),
+		}).Debug("Responding to packet")
 
 		if response != nil {
 			_, err = s.SendPacket(response)
@@ -93,16 +117,21 @@ func (s *Server) Worker(results chan error) {
 }
 
 func (s *Server) Serve() error {
+	log.Debug("Starting SFTP server")
+
 	defer s.Out.Close()
 
+	log.Debug("Receiving packets")
 	go s.ReceivePackets()
 
 	results := make(chan error)
 
+	log.Debug("Starting server workers")
 	for i := 0; i < s.WorkerCount; i++ {
 		go s.Worker(results)
 	}
 
+	log.Debug("Checking for worker errors")
 	for i := 0; i < s.WorkerCount; i++ {
 		err := <-results
 
@@ -111,6 +140,7 @@ func (s *Server) Serve() error {
 		}
 	}
 
+	log.Debug("Stopping SFTP server")
 	return nil
 }
 
@@ -122,6 +152,10 @@ func NewServer(in io.Reader, out io.WriteCloser, workers int) (*Server, error) {
 		PacketChannel: make(chan Packet),
 		WorkerCount:   workers,
 	}
+
+	log.WithFields(log.Fields{
+		"workers": workers,
+	}).Info("Created new server")
 
 	return server, nil
 }
