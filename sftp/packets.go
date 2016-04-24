@@ -2,6 +2,8 @@ package sftp
 
 import (
 	"fmt"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // SFTP Packet Type Values
@@ -93,6 +95,7 @@ func UnmarshalPacket(b []byte) (int, uint32, []byte, error) {
 
 func DecodePacket(b []byte) (Packet, error) {
 	var packet Packet
+	var err error
 
 	type_ := int(b[4])
 
@@ -102,10 +105,26 @@ func DecodePacket(b []byte) (Packet, error) {
 	case SSH_FXP_VERSION:
 		packet = &SSHFxVersionPacket{}
 	default:
-		return packet, fmt.Errorf("Unrecognized packet type %v", type_)
+		err = fmt.Errorf("Unrecognized packet type %v", type_)
 	}
 
-	err := packet.Unmarshal(b)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"type": type_,
+		}).Error("Unrecognized packet type")
+
+		return nil, err
+	}
+
+	err = packet.Unmarshal(b)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.WithFields(log.Fields{
+		"type": packet.Type(),
+	}).Debug("Decoded packet")
 
 	return packet, err
 }
