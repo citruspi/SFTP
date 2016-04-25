@@ -38,6 +38,14 @@ const (
 	SSH_FXP_EXTENDED_REPLY = 201
 )
 
+// SFTP SSH_FXP_REALPATH Control Byte Values
+// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-8.9
+const (
+	SSH_FXP_REALPATH_NO_CHECK    byte = 0x00000001
+	SSH_FXP_REALPATH_STAT_IF     byte = 0x00000002
+	SSH_FXP_REALPATH_STAT_ALWAYS byte = 0x00000003
+)
+
 type Packet interface {
 	Type() int
 	RequestId() uint32
